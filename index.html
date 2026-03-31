@@ -6,67 +6,84 @@
     <title>Meu Clima Pro</title>
     <link rel="manifest" href="manifest.json">
     <style>
+    <style>
         :root {
             --sky-color: #87CEEB;
             --text-color: #3c4043;
         }
         body {
             margin: 0;
+            padding: 0;
             font-family: 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(to bottom, var(--sky-color), #ffffff);
             min-height: 100vh;
             color: var(--text-color);
-            transition: background 1s ease;
+            overflow-x: hidden; /* Impede a página de balançar para os lados */
         }
-        .container { padding: 20px; }
+        .container { 
+            padding: 15px; 
+            max-width: 100vw; 
+            box-sizing: border-box;
+        }
         
-        /* Barra de Pesquisa Minimalista */
+        /* Barra de Pesquisa Ajustada */
         .search-box {
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 8px;
             margin-bottom: 20px;
+            width: 100%;
         }
         input {
-            flex: 1;
-            padding: 10px;
-            border-radius: 20px;
+            flex: 1; /* Ocupa o espaço que sobra, mas respeita o botão */
+            min-width: 0; /* Importante para não empurrar o flexbox */
+            padding: 12px 15px;
+            border-radius: 25px;
             border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.9);
             outline: none;
+            font-size: 1rem;
         }
         button {
-            padding: 10px 15px;
-            border-radius: 20px;
+            padding: 12px;
+            min-width: 50px; /* Garante que a lupa tenha um tamanho fixo */
+            border-radius: 25px;
             border: none;
             background: white;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .city-name { font-size: 1.8rem; font-weight: 500; }
-        .temp-main { font-size: 5rem; font-weight: 300; margin: 10px 0; }
+        .city-name { font-size: 1.6rem; font-weight: 500; }
+        .temp-main { font-size: 4.5rem; font-weight: 300; margin: 5px 0; }
         
-        /* Grade de Detalhes Técnicos */
         .details-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-            background: rgba(255,255,255,0.3);
+            gap: 12px;
+            margin-top: 15px;
+            background: rgba(255,255,255,0.4);
             padding: 15px;
             border-radius: 20px;
         }
-        .detail-item { font-size: 0.9rem; color: #5f6368; }
-        .detail-item b { color: #202124; display: block; font-size: 1.1rem; }
+        .detail-item { font-size: 0.85rem; color: #5f6368; }
+        .detail-item b { color: #202124; display: block; font-size: 1rem; }
 
-        .frog-area { text-align: center; margin: 30px 0; }
-        .sun-img { width: 100px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
+        .frog-area { text-align: center; margin: 20px 0; }
+        .sun-img { width: 90px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
 
         .footer-card {
             background: white;
             border-radius: 30px 30px 0 0;
             padding: 20px;
             box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            margin-top: auto;
         }
+    </style>
+
     </style>
 </head>
 <body>
