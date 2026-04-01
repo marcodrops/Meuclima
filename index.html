@@ -2,8 +2,11 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Clima Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#87CEEB">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Meu Clima Pro</title>
+    <link rel="manifest" href="manifest.json">
     <style>
         :root {
             --sky-color: #87CEEB;
@@ -19,67 +22,75 @@
             overflow-x: hidden;
         }
 
-        .container { padding: 15px; box-sizing: border-box; width: 100%; }
+        .container { 
+            padding: 20px; 
+            padding-top: 10px;
+            box-sizing: border-box; 
+            width: 100%; 
+        }
+
+        /* INSTRUÇÃO SUPERIOR */
+        .instrucao {
+            font-size: 0.85rem;
+            color: #444;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 500;
+        }
 
         /* BUSCA COMPACTA */
         .search-box {
-            display: flex; gap: 8px; margin-bottom: 20px; width: 100%;
+            display: flex; gap: 8px; margin-bottom: 15px; width: 100%;
         }
         input {
-            flex: 1; min-width: 0; padding: 12px 15px;
-            border-radius: 25px; border: 1px solid rgba(0,0,0,0.2);
-            background: white; outline: none; font-size: 1rem;
+            flex: 1; min-width: 0; padding: 12px 18px;
+            border-radius: 25px; border: 1px solid rgba(0,0,0,0.15);
+            background: white; color: black; outline: none; font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        /* LISTA DE CIDADES (TODAS NA TELA) */
+        /* DASHBOARD DE CIDADES */
         .city-list {
-            display: flex; flex-direction: column; gap: 12px; margin-bottom: 80px;
+            display: flex; flex-direction: column; gap: 10px;
+            padding-bottom: 30px;
         }
         .city-card {
-            background: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.6);
             border: 2px solid transparent;
             border-radius: 20px;
             padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(5px);
-            transition: all 0.3s;
+            backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
         }
         .city-card.active {
             border-color: var(--active-border);
-            background: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.9);
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         .city-info h3 { margin: 0; font-size: 1.1rem; }
-        .city-info p { margin: 2px 0 0; font-size: 0.85rem; color: #5f6368; text-transform: capitalize; }
+        .city-info p { margin: 2px 0 0; font-size: 0.8rem; color: #5f6368; text-transform: capitalize; }
         
         .city-temp { text-align: right; }
-        .city-temp .main-t { font-size: 1.8rem; font-weight: bold; display: block; }
-        .city-temp .extra-t { font-size: 0.75rem; color: #5f6368; }
-
-        .footer-card {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: white; border-radius: 25px 25px 0 0;
-            padding: 15px; text-align: center; font-size: 0.85rem;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
-        }
+        .main-t { font-size: 1.8rem; font-weight: bold; display: block; line-height: 1; }
+        .extra-t { font-size: 0.7rem; color: #5f6368; margin-top: 4px; display: block; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="instrucao">Clique em uma cidade para alterar</div>
+    
     <div class="search-box">
-        <input type="text" id="cityInput" placeholder="Clique num card e digite a nova cidade..." 
+        <input type="search" id="cityInput" placeholder="Digite o nome da nova cidade..." 
                onkeypress="if(event.key === 'Enter') updateCity()">
     </div>
 
     <div class="city-list" id="dashboard">
         </div>
-</div>
-
-<div class="footer-card" id="infoExtra">
-    Selecione um card para editar a cidade.
 </div>
 
 <script>
@@ -110,18 +121,17 @@
                         </div>
                         <div class="city-temp">
                             <span class="main-t">${Math.round(data.main.temp)}°</span>
-                            <span class="extra-t">Sensa: ${Math.round(data.main.feels_like)}° | Umid: ${data.main.humidity}%</span>
+                            <span class="extra-t">Sens: ${Math.round(data.main.feels_like)}° | Umid: ${data.main.humidity}%</span>
                         </div>
                     `;
                 } else {
-                    card.innerHTML = `<div>Cidade "${city}" não encontrada</div>`;
+                    card.innerHTML = `<div style="padding:10px">Cidade "${city}" não encontrada</div>`;
                 }
             } catch (e) {
-                card.innerHTML = `<div>Erro de conexão</div>`;
+                card.innerHTML = `<div style="padding:10px">Erro de conexão</div>`;
             }
             dashboard.appendChild(card);
         }
-        updateFooter();
     }
 
     function updateCity() {
@@ -131,21 +141,14 @@
             myCities[selectedIndex] = newCity;
             localStorage.setItem('myCities', JSON.stringify(myCities));
             input.value = '';
+            // Tira o foco do teclado após o enter
+            input.blur();
             fetchAllData();
         }
     }
 
-    function updateFooter() {
-        // Pega os dados da cidade atualmente selecionada para a dica do rodapé
-        const activeCard = document.querySelectorAll('.city-card')[selectedIndex];
-        if(activeCard) {
-            document.getElementById('infoExtra').innerText = "Toque em uma cidade para focar ou editar.";
-        }
-    }
-
     fetchAllData();
-    // Atualiza tudo a cada 5 minutos automaticamente
-    setInterval(fetchAllData, 300000);
+    setInterval(fetchAllData, 300000); // 5 min
 </script>
 
 </body>
