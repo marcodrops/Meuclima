@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meu Clima Pro</title>
-    <link rel="manifest" href="manifest.json">
+    <title>Dashboard Clima Pro</title>
     <style>
         :root {
             --sky-color: #87CEEB;
             --text-primary: #202124;
-            --text-secondary: #5f6368;
+            --active-border: #1a73e8;
         }
         
         html, body {
@@ -20,155 +19,133 @@
             overflow-x: hidden;
         }
 
-        .container { padding: 20px; box-sizing: border-box; }
+        .container { padding: 15px; box-sizing: border-box; width: 100%; }
 
-        /* SELETOR DE CIDADES (5 SLOTS) */
-        .city-selector {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-        .city-btn {
-            background: rgba(255,255,255,0.6);
-            border: 1px solid rgba(0,0,0,0.1);
-            padding: 10px 5px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            text-align: center;
-            cursor: pointer;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .city-btn.active {
-            background: white;
-            border: 2px solid var(--sky-color);
-            font-weight: bold;
-        }
-
-        /* BARRA DE PESQUISA (PARA ALTERAR CIDADE SELECIONADA) */
+        /* BUSCA COMPACTA */
         .search-box {
-            display: flex; gap: 8px; margin-bottom: 20px;
+            display: flex; gap: 8px; margin-bottom: 20px; width: 100%;
         }
         input {
-            flex: 1; padding: 12px; border-radius: 25px; border: 1px solid rgba(0,0,0,0.2);
-            background: white; outline: none; font-size: 0.9rem;
-        }
-        button.search-btn {
-            padding: 10px 15px; border-radius: 25px; border: none;
-            background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex: 1; min-width: 0; padding: 12px 15px;
+            border-radius: 25px; border: 1px solid rgba(0,0,0,0.2);
+            background: white; outline: none; font-size: 1rem;
         }
 
-        /* ÁREA DE EXIBIÇÃO */
-        .display-area { text-align: left; }
-        .city-name { font-size: 1.8rem; font-weight: 500; }
-        .desc { font-size: 1.1rem; color: var(--text-secondary); text-transform: capitalize; }
-        .temp-main { font-size: 5.5rem; font-weight: 300; margin: 5px 0; }
-
-        .details-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
-            background: rgba(255,255,255,0.5); padding: 20px;
-            border-radius: 25px; backdrop-filter: blur(5px);
+        /* LISTA DE CIDADES (TODAS NA TELA) */
+        .city-list {
+            display: flex; flex-direction: column; gap: 12px; margin-bottom: 80px;
         }
-        .detail-item { font-size: 0.9rem; color: var(--text-secondary); }
-        .detail-item b { color: black; display: block; font-size: 1.3rem; margin-top: 5px; }
-
-        .frog-area { text-align: center; padding: 30px 0; }
-        .sun-img { width: 90px; }
+        .city-card {
+            background: rgba(255,255,255,0.7);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s;
+        }
+        .city-card.active {
+            border-color: var(--active-border);
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .city-info h3 { margin: 0; font-size: 1.1rem; }
+        .city-info p { margin: 2px 0 0; font-size: 0.85rem; color: #5f6368; text-transform: capitalize; }
+        
+        .city-temp { text-align: right; }
+        .city-temp .main-t { font-size: 1.8rem; font-weight: bold; display: block; }
+        .city-temp .extra-t { font-size: 0.75rem; color: #5f6368; }
 
         .footer-card {
-            background: white; border-radius: 30px 30px 0 0;
-            padding: 25px; text-align: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; border-radius: 25px 25px 0 0;
+            padding: 15px; text-align: center; font-size: 0.85rem;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="city-selector" id="citySelector">
-        </div>
-
     <div class="search-box">
-        <input type="text" id="cityInput" placeholder="Mudar cidade do slot...">
-        <button class="search-btn" onclick="updateCurrentSlot()">Atualizar</button>
+        <input type="text" id="cityInput" placeholder="Clique num card e digite a nova cidade..." 
+               onkeypress="if(event.key === 'Enter') updateCity()">
     </div>
 
-    <div class="display-area">
-        <div class="city-name" id="nomeCidade">--</div>
-        <div class="desc" id="descricao">--</div>
-        <div class="temp-main" id="tempAtual">--°</div>
-
-        <div class="details-grid">
-            <div class="detail-item">Sensação <b id="sensacao">--°</b></div>
-            <div class="detail-item">Humidade <b id="umidade">--%</b></div>
+    <div class="city-list" id="dashboard">
         </div>
-    </div>
 </div>
 
-<div class="frog-area">
-    <img src="https://www.gstatic.com/images/branding/product/2x/weather_64dp.png" class="sun-img">
-</div>
-
-<div class="footer-card">
-    <div id="infoExtra">Selecione uma cidade acima.</div>
+<div class="footer-card" id="infoExtra">
+    Selecione um card para editar a cidade.
 </div>
 
 <script>
     const API_KEY = '1213db21e3a1749eda12fd9ff6c20524';
-    
-    // Lista inicial de cidades (será salva no navegador)
     let myCities = JSON.parse(localStorage.getItem('myCities')) || 
                    ['Ipatinga', 'Santana do Paraíso', 'Coronel Fabriciano', 'Timóteo', 'Belo Horizonte'];
-    let activeSlot = 0;
+    let selectedIndex = 0;
 
-    function renderSelectors() {
-        const container = document.getElementById('citySelector');
-        container.innerHTML = '';
-        myCities.forEach((city, index) => {
-            const btn = document.createElement('div');
-            btn.className = `city-btn ${index === activeSlot ? 'active' : ''}`;
-            btn.innerText = city.split(',')[0];
-            btn.onclick = () => { activeSlot = index; selectCity(city); renderSelectors(); };
-            container.appendChild(btn);
-        });
+    async function fetchAllData() {
+        const dashboard = document.getElementById('dashboard');
+        dashboard.innerHTML = '';
+
+        for (let i = 0; i < myCities.length; i++) {
+            const city = myCities[i];
+            const card = document.createElement('div');
+            card.className = `city-card ${i === selectedIndex ? 'active' : ''}`;
+            card.onclick = () => { selectedIndex = i; fetchAllData(); };
+
+            try {
+                const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&lang=pt_br&appid=${API_KEY}`);
+                const data = await res.json();
+
+                if(data.cod === 200) {
+                    card.innerHTML = `
+                        <div class="city-info">
+                            <h3>${data.name}</h3>
+                            <p>${data.weather[0].description}</p>
+                        </div>
+                        <div class="city-temp">
+                            <span class="main-t">${Math.round(data.main.temp)}°</span>
+                            <span class="extra-t">Sensa: ${Math.round(data.main.feels_like)}° | Umid: ${data.main.humidity}%</span>
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML = `<div>Cidade "${city}" não encontrada</div>`;
+                }
+            } catch (e) {
+                card.innerHTML = `<div>Erro de conexão</div>`;
+            }
+            dashboard.appendChild(card);
+        }
+        updateFooter();
     }
 
-    async function selectCity(cidade) {
-        try {
-            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cidade}&units=metric&lang=pt_br&appid=${API_KEY}`);
-            const data = await res.json();
-
-            if(data.cod !== 200) { alert("Cidade não encontrada!"); return; }
-
-            document.getElementById('nomeCidade').innerText = data.name;
-            document.getElementById('tempAtual').innerText = Math.round(data.main.temp) + '°';
-            document.getElementById('descricao').innerText = data.weather[0].description;
-            document.getElementById('sensacao').innerText = Math.round(data.main.feels_like) + '°';
-            document.getElementById('umidade').innerText = data.main.humidity + '%';
-
-            let dica = "Humidade em " + data.main.humidity + "%. ";
-            if(data.main.humidity > 70) dica += "Ideal usar o modo 'Dry' no seu LG.";
-            else dica += "Ótimo clima para os seus Coleiros.";
-            document.getElementById('infoExtra').innerText = dica;
-
-        } catch (err) { console.error(err); }
-    }
-
-    function updateCurrentSlot() {
-        const newCity = document.getElementById('cityInput').value;
+    function updateCity() {
+        const input = document.getElementById('cityInput');
+        const newCity = input.value.trim();
         if(newCity) {
-            myCities[activeSlot] = newCity;
+            myCities[selectedIndex] = newCity;
             localStorage.setItem('myCities', JSON.stringify(myCities));
-            selectCity(newCity);
-            renderSelectors();
-            document.getElementById('cityInput').value = '';
+            input.value = '';
+            fetchAllData();
         }
     }
 
-    // Inicialização
-    renderSelectors();
-    selectCity(myCities[activeSlot]);
+    function updateFooter() {
+        // Pega os dados da cidade atualmente selecionada para a dica do rodapé
+        const activeCard = document.querySelectorAll('.city-card')[selectedIndex];
+        if(activeCard) {
+            document.getElementById('infoExtra').innerText = "Toque em uma cidade para focar ou editar.";
+        }
+    }
+
+    fetchAllData();
+    // Atualiza tudo a cada 5 minutos automaticamente
+    setInterval(fetchAllData, 300000);
 </script>
 
 </body>
