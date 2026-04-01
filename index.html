@@ -2,158 +2,138 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Clima</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meu Clima Pro</title>
     <link rel="manifest" href="manifest.json">
     <style>
-    <style>
         :root {
-            --sky-color: #87CEEB; /* Azul do céu */
-            --text-color: #3c4043;
+            --sky-color: #87CEEB;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
         }
         
-        /* Garante que o fundo ocupe a tela toda sem falhas */
         html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
+            margin: 0; padding: 0; min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(to bottom, var(--sky-color) 0%, #ffffff 100%) no-repeat fixed;
+            color: var(--text-primary);
             overflow-x: hidden;
         }
 
-        body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            /* O gradiente agora fica fixo no fundo */
-            background: linear-gradient(to bottom, var(--sky-color) 0%, #ffffff 100%) no-repeat fixed;
-            background-size: cover;
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-        }
+        .container { padding: 20px; box-sizing: border-box; }
 
-        .container { 
-            padding: 20px; 
-            flex: 1; /* Faz o conteúdo principal "empurrar" o rodapé */
-            box-sizing: border-box;
-        }
-        
-        /* Barra de Pesquisa Compacta */
+        /* BARRA DE PESQUISA REFORÇADA */
         .search-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 25px;
-            width: 100%;
+            display: flex; gap: 10px; margin-bottom: 25px; width: 100%;
         }
         input {
-            flex: 1;
-            min-width: 0;
-            padding: 12px 18px;
-            border-radius: 25px;
-            border: 1px solid rgba(0,0,0,0.1);
-            background: rgba(255,255,255,0.8);
-            outline: none;
-            font-size: 1rem;
+            flex: 1; min-width: 0; padding: 12px 15px;
+            border-radius: 25px; border: 1px solid rgba(0,0,0,0.2);
+            background: #ffffff; color: #000000; outline: none; font-size: 1rem;
         }
         button {
-            padding: 12px;
-            min-width: 50px;
-            border-radius: 25px;
-            border: none;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 12px; min-width: 50px; border-radius: 25px;
+            border: none; background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            font-size: 1.2rem; cursor: pointer;
         }
 
         .city-name { font-size: 1.8rem; font-weight: 500; }
-        .temp-main { font-size: 5rem; font-weight: 300; margin: 10px 0; }
-        
-        /* Grade de Detalhes */
+        .desc { font-size: 1.1rem; color: var(--text-secondary); text-transform: capitalize; margin-bottom: 10px; }
+        .temp-main { font-size: 5.5rem; font-weight: 300; margin: 5px 0; }
+
+        /* GRADE DE DETALHES (MÍN, MÁX, SENSAÇÃO, UMIDADE) */
         .details-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-            background: rgba(255,255,255,0.4);
-            padding: 18px;
-            border-radius: 25px;
-            backdrop-filter: blur(5px); /* Efeito de vidro fosco */
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+            background: rgba(255,255,255,0.5); padding: 18px;
+            border-radius: 25px; backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
         }
-        .detail-item { font-size: 0.9rem; color: #5f6368; }
-        .detail-item b { color: #202124; display: block; font-size: 1.1rem; margin-top: 4px; }
+        .detail-item { font-size: 0.85rem; color: var(--text-secondary); }
+        .detail-item b { color: #000000; display: block; font-size: 1.1rem; margin-top: 3px; }
 
-        .frog-area { text-align: center; padding: 30px 0; }
-        .sun-img { width: 100px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.15)); }
+        .frog-area { text-align: center; padding: 25px 0; }
+        .sun-img { width: 95px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
 
-        /* Rodapé Branco que fecha o visual */
         .footer-card {
-            background: white;
-            border-radius: 30px 30px 0 0;
-            padding: 25px 20px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
-            text-align: center;
-            font-size: 0.95rem;
+            background: #ffffff; border-radius: 30px 30px 0 0;
+            padding: 25px; text-align: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            margin-top: 10px;
         }
-    </style>
-
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="city" id="nomeCidade">Ipatinga</div>
-        <div class="details" id="descricao">Carregando clima...</div>
-        <div class="temp-row">
-            <h1 class="current-temp" id="tempAtual">--°</h1>
-        </div>
+<div class="container">
+    <div class="search-box">
+        <input type="text" id="cityInput" placeholder="Digite uma cidade...">
+        <button onclick="searchCity()">🔍</button>
     </div>
 
-    <div class="frog-area">
-        <div class="frog-area">
-    <img src="https://www.gstatic.com/images/branding/product/2x/weather_64dp.png" alt="Sapinho do Clima" class="frog-img">
+    <div class="city-name" id="nomeCidade">Ipatinga</div>
+    <div class="desc" id="descricao">Carregando...</div>
+    <div class="temp-main" id="tempAtual">--°</div>
+
+    <div class="details-grid">
+        <div class="detail-item">Mínima <b id="tempMin">--°</b></div>
+        <div class="detail-item">Máxima <b id="tempMax">--°</b></div>
+        <div class="detail-item">Sensação <b id="sensacao">--°</b></div>
+        <div class="detail-item">Umidade <b id="umidade">--%</b></div>
+    </div>
 </div>
 
-    </div>
+<div class="frog-area">
+    <img src="https://www.gstatic.com/images/branding/product/2x/weather_64dp.png" class="sun-img">
+</div>
 
-    <div class="footer-card">
-        <span class="forecast-label">Hoje em Ipatinga</span>
-        <div id="infoExtra" style="font-size: 0.9rem; color: #70757a;">
-            Um dia perfeito para observar os Coleiros na região.
-        </div>
-    </div>
+<div class="footer-card">
+    <div id="infoExtra">Clima ideal para observar os pássaros.</div>
+</div>
 
-    <script>
-        const API_KEY = '1213db21e3a1749eda12fd9ff6c20524';
-        const CITY = 'Ipatinga,BR';
+<script>
+    const API_KEY = '1213db21e3a1749eda12fd9ff6c20524';
 
-        async function getWeatherData() {
-            try {
-                const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${CITY}&units=metric&lang=pt_br&appid=${API_KEY}`);
-                const data = await response.json();
+    async function getWeatherData(cidade = 'Ipatinga,BR') {
+        try {
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cidade}&units=metric&lang=pt_br&appid=${API_KEY}`);
+            const data = await res.json();
 
-                document.getElementById('tempAtual').innerText = Math.round(data.main.temp) + '°';
-                document.getElementById('descricao').innerText = data.weather[0].description.charAt(0).toUpperCase() + data.weather[0].description.slice(1);
-                
-                // Lógica simples de cor de fundo
-                const mainWeather = data.weather[0].main.toLowerCase();
-                if(mainWeather.includes('rain')) {
-                    document.documentElement.style.setProperty('--sky-color', '#4a69bd');
-                } else if (mainWeather.includes('cloud')) {
-                    document.documentElement.style.setProperty('--sky-color', '#a5b1c2');
-                }
-
-            } catch (err) {
-                document.getElementById('descricao').innerText = "Erro ao carregar dados.";
+            if(data.cod !== 200) { 
+                alert("Cidade não encontrada!"); 
+                return; 
             }
-        }
 
-        if(API_KEY !== 'SUA_CHAVE_AQUI') {
-            getWeatherData();
-        } else {
-            document.getElementById('descricao').innerText = "Insira sua API Key no código.";
+            // Preenchendo os dados na tela
+            document.getElementById('nomeCidade').innerText = data.name;
+            document.getElementById('tempAtual').innerText = Math.round(data.main.temp) + '°';
+            document.getElementById('descricao').innerText = data.weather[0].description;
+            document.getElementById('tempMin').innerText = Math.round(data.main.temp_min) + '°';
+            document.getElementById('tempMax').innerText = Math.round(data.main.temp_max) + '°';
+            document.getElementById('sensacao').innerText = Math.round(data.main.feels_like) + '°';
+            document.getElementById('umidade').innerText = data.main.humidity + '%';
+
+            // Dica de conforto térmico
+            let dica = "Umidade em " + data.main.humidity + "%. ";
+            if(data.main.humidity > 70) {
+                dica += "Bom usar o modo 'Dry' no seu LG.";
+            } else {
+                dica += "Dia agradável para os Coleiros.";
+            }
+            document.getElementById('infoExtra').innerText = dica;
+
+        } catch (err) { 
+            console.error("Erro ao buscar clima:", err); 
         }
-    </script>
+    }
+
+    function searchCity() {
+        const city = document.getElementById('cityInput').value;
+        if(city) {
+            getWeatherData(city);
+        }
+    }
+
+    // Inicia com a sua cidade
+    getWeatherData();
+</script>
 </body>
 </html>
